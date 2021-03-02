@@ -1,8 +1,11 @@
+// outil de cryptage
 const bcrypt = require('bcrypt');
+// outil d'identication
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 
-
+// cree un utilisation
 exports.signup = (req, res, next) => {
     bcrypt.hash(req.body.password, 10)
     .then(hash => {
@@ -17,6 +20,7 @@ exports.signup = (req, res, next) => {
     .catch(error => res.status(500).json({ error }))
 };
 
+// cherche un utilisateur
 exports.login = (req, res, next) => {
     User.findOne({ email: req.body.email })
     .then(user => {
@@ -30,7 +34,11 @@ exports.login = (req, res, next) => {
           }
           res.status(200).json({
             userId: user._id,
-            token: 'TOKEN'
+            token:  jwt.sign(
+              { userId: user._id },
+              'RANDOM_TOKEN_SECRET',
+              { expiresIn: '24h' }
+            )
           });
         })
         .catch(error => res.status(500).json({ error }));
